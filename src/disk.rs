@@ -7,6 +7,7 @@ pub struct DiskManager {
     next_page_id: u64,
 }
 
+#[derive(Copy, Clone)]
 pub struct PageId(pub u64);
 
 impl PageId {
