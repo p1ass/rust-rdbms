@@ -1,6 +1,7 @@
 use zerocopy::{AsBytes, ByteSlice, ByteSliceMut, FromBytes, LayoutVerified};
 
 use super::leaf::Leaf;
+use crate::btree::branch::Branch;
 
 pub const NODE_TYPE_LEAF: [u8; 8] = *b"LEAF    ";
 pub const NODE_TYPE_BRANCH: [u8; 8] = *b"BRANCH  ";
