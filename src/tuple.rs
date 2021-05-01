@@ -1,4 +1,6 @@
 use crate::memcmpable;
+use std::fmt;
+use std::fmt::Debug;
 
 pub fn encode(elems: impl Iterator<Item = impl AsRef<[u8]>>, bytes: &mut Vec<u8>) {
     elems.for_each(|elem| {
@@ -15,5 +17,25 @@ pub fn decode(bytes: &[u8], elems: &mut Vec<Vec<u8>>) {
         let mut elem = vec![];
         memcmpable::decode(&mut rest, &mut elem);
         elems.push(elem);
+    }
+}
+
+pub struct Pretty<'a, T>(pub &'a [T]);
+
+impl<'a, T: AsRef<[u8]>> Debug for Pretty<'a, T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut d = f.debug_tuple("Tuple");
+        for elem in self.0 {
+            let bytes = elem.as_ref();
+            match std::str::from_utf8(&bytes) {
+                Ok(s) => {
+                    d.field(&format_args!("{:?} {:02x?}", s, bytes));
+                }
+                Err(_) => {
+                    d.field(&format_args!("{:02x?}", bytes));
+                }
+            }
+        }
+        d.finish()
     }
 }
