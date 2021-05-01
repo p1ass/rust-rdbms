@@ -137,16 +137,15 @@ pub struct ExecIndexScan<'a> {
 
 impl<'a> Executor for ExecIndexScan<'a> {
     fn next(&mut self, bufmgr: &mut BufferPoolManager) -> Result<Option<Tuple>> {
-        let (pkey_bytes, tuple_bytes) = match self.index_iter.next(bufmgr)? {
+        let (skey_bytes, pkey_bytes) = match self.index_iter.next(bufmgr)? {
             Some(pair) => pair,
             None => return Ok(None),
         };
         let mut skey = vec![];
-        tuple::decode(&pkey_bytes, &mut skey);
+        tuple::decode(&skey_bytes, &mut skey);
         if !(self.while_cond)(&skey) {
             return Ok(None);
         }
-
         let mut table_iter = self
             .table_btree
             .search(bufmgr, SearchMode::Key(pkey_bytes))?;
