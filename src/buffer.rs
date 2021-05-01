@@ -171,4 +171,15 @@ impl BufferPoolManager {
         self.page_table.insert(page_id, buffer_id);
         Ok(page)
     }
+
+    pub fn flush(&mut self) -> Result<(), Error> {
+        for (&page_id, &buffer_id) in self.page_table.iter() {
+            let frame = &self.pool[buffer_id];
+            let mut page = frame.buffer.page.borrow_mut();
+            self.disk.write_page_data(page_id, page.as_mut())?;
+            frame.buffer.is_dirty.set(false);
+        }
+        self.disk.sync()?;
+        Ok(())
+    }
 }
